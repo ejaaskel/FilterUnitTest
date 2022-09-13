@@ -5,11 +5,11 @@ cmake_minimum_required(VERSION 3.21)
 
 # Change this to the name of your plugin
 # This cannot have spaces (but PRODUCT_NAME can)
-set(PROJECT_NAME "Pamplejuce")
+set(PROJECT_NAME "FilterUnitTest")
 
 # Set the plugin formats you'll be building here.
 # Valid formats: AAX Unity VST AU AUv3 Standalone
-set(FORMATS AU VST3 AUv3)
+set(FORMATS VST3)
 
 # Reads in VERSION file and sticks in it CURRENT_VERSION variable
 file(READ VERSION CURRENT_VERSION)
@@ -47,24 +47,25 @@ juce_add_plugin("${PROJECT_NAME}"
     # VERSION ...                               # Set this if the plugin version is different to the project version
     # ICON_BIG ...                              # ICON_* arguments specify a path to an image file to use as an icon for the Standalone
     # ICON_SMALL ...
-    COMPANY_NAME Pamplejuce
-    BUNDLE_ID com.pamplejuce.pamplejuce
+    COMPANY_NAME ejaaskel
+    BUNDLE_ID com.ejaaskel.filterunittest
     # IS_SYNTH TRUE/FALSE                       # Is this a synth or an effect?
     # NEEDS_MIDI_INPUT TRUE/FALSE               # Does the plugin need midi input?
     # NEEDS_MIDI_OUTPUT TRUE/FALSE              # Does the plugin need midi output?
     # IS_MIDI_EFFECT TRUE/FALSE                 # Is this plugin a MIDI effect?
     # EDITOR_WANTS_KEYBOARD_FOCUS TRUE/FALSE    # Does the editor need keyboard focus?
     COPY_PLUGIN_AFTER_BUILD TRUE # On MacOS, plugin will be copied to /Users/you/Library/Audio/Plug-Ins/
-    PLUGIN_MANUFACTURER_CODE Pamp               # This has to be one uppercase, rest lower for AU formats
-    PLUGIN_CODE P001                            # A unique four-character plugin id with at least one upper-case character
+    PLUGIN_MANUFACTURER_CODE Fut                # This has to be one uppercase, rest lower for AU formats
+    PLUGIN_CODE E001                            # A unique four-character plugin id with at least one upper-case character
     FORMATS "${FORMATS}"
-    PRODUCT_NAME "${PROJECT_NAME}")        # The name of the final executable, which can differ from the target name
+    PRODUCT_NAME "Filter Unit Test")        # The name of the final executable, which can differ from the target name
 
 # C++20 please
 target_compile_features("${PROJECT_NAME}" PRIVATE cxx_std_20)
 
 # Manually list all .h and .cpp files for the plugin (avoiding globs):
 set(SourceFiles
+    Source/Filter.h
     Source/PluginEditor.h
     Source/PluginProcessor.h
     Source/PluginEditor.cpp
@@ -108,7 +109,8 @@ set_target_properties(Assets PROPERTIES FOLDER "Targets")
 
 # We'll need to link to these from our plugin as well as our tests
 set(JUCE_DEPENDENCIES
-    juce::juce_audio_utils)
+    juce::juce_audio_utils
+    juce::juce_dsp)
 
 target_compile_definitions("${PROJECT_NAME}"
     PUBLIC

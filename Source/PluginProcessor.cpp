@@ -3,6 +3,7 @@
 
 //==============================================================================
 AudioPluginAudioProcessor::AudioPluginAudioProcessor()
+#ifndef JucePlugin_PreferredChannelConfigurations
      : AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
                       #if ! JucePlugin_IsSynth
@@ -10,8 +11,18 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       )
+                       ),
+#endif
+parameters(*this, nullptr, juce::Identifier("VALUETREE"),
+        {
+            std::make_unique<juce::AudioParameterFloat>("WET",
+                                                      "wet",
+                                                      0.0f,
+                                                      1.0f,
+                                                      1.0f)
+        })
 {
+    wetParameter = parameters.getRawParameterValue("WET");
 }
 
 AudioPluginAudioProcessor::~AudioPluginAudioProcessor()
@@ -87,8 +98,11 @@ void AudioPluginAudioProcessor::changeProgramName (int index, const juce::String
 void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     // Use this method as the place to do any pre-playback
-    // initialisation that you need..
-    juce::ignoreUnused (sampleRate, samplesPerBlock);
+    // initialisation that you need.
+    scratchBuffer.setSize(getNumInputChannels(), samplesPerBlock);
+    juce::dsp::ProcessSpec spec { sampleRate, static_cast<juce::uint32> (samplesPerBlock) };
+    spec.numChannels = getNumOutputChannels();
+    fxChain.prepare(spec);
 }
 
 void AudioPluginAudioProcessor::releaseResources()
@@ -149,6 +163,24 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
         juce::ignoreUnused (channelData);
         // ..do something to the data...
     }
+
+    juce::AudioSampleBuffer tmpBuffer (scratchBuffer.getArrayOfWritePointers(), buffer.getNumChannels(), buffer.getNumSamples());
+    for (int ch = 0; ch < buffer.getNumChannels(); ++ch) {
+        tmpBuffer.copyFrom (ch, 0, buffer, ch, 0, buffer.getNumSamples());
+    }
+
+    auto block = juce::dsp::AudioBlock<float> (tmpBuffer).getSubBlock ((size_t) 0, (size_t) tmpBuffer.getNumSamples());
+    auto context = juce::dsp::ProcessContextReplacing<float> (block);
+    fxChain.process (context);
+
+    auto *writePointers = buffer.getArrayOfWritePointers();
+    auto *tmpWritePointers =tmpBuffer.getArrayOfReadPointers();
+    for (int ch = 0; ch < buffer.getNumChannels(); ++ch) {
+        for (int sam = 0; sam < buffer.getNumSamples(); ++sam) {
+	    writePointers[ch][sam] = (1.0f - *wetParameter) * writePointers[ch][sam];
+	    writePointers[ch][sam] += (*wetParameter) * tmpWritePointers[ch][sam]; 
+	}
+    }
 }
 
 //==============================================================================
@@ -183,4 +215,8 @@ void AudioPluginAudioProcessor::setStateInformation (const void* data, int sizeI
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new AudioPluginAudioProcessor();
+}
+
+juce::AudioProcessorValueTreeState* AudioPluginAudioProcessor::getParameters() {
+    return &parameters;
 }

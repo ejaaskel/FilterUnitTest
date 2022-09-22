@@ -2,6 +2,7 @@
 #include <catch2/catch_all.hpp>
 #include "Helpers.h"
 #include "Matchers.h"
+#include "ImageProcessing.h"
 
 AudioPluginAudioProcessor *testPluginProcessor = nullptr;
 
@@ -26,6 +27,16 @@ TEST_CASE("AudioBuffer equals itself", "[dummy]")
 
 }*/
 
+TEST_CASE("Draw Sine Sweep", "[dummy]")
+{
+    juce::MemoryMappedAudioFormatReader *reader = Helpers::readSineSweep();
+    WARN(reader->lengthInSamples);
+    //juce::AudioBuffer<float> *buffer = new juce::AudioBuffer<float>(reader->numChannels, reader->lengthInSamples);
+    //reader->read(buffer, reader->numChannels, reader->lengthInSamples, 0, true, true);
+    //WARN(buffer->getNumSamples());
+    ImageProcessing::drawAudioFormatReaderImage(reader, "SineSweep");
+    //ImageProcessing::drawAudioBufferImage(buffer, "SineSweep");
+}
 
 TEST_CASE("Plugin instance name", "[name]")
 {

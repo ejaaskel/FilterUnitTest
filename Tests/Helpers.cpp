@@ -16,6 +16,7 @@ juce::AudioBuffer<float>* Helpers::generateAudioSampleBuffer() {
 
     return buffer;
 }
+
 juce::AudioBuffer<float>* Helpers::generateMaxAudioSampleBuffer() {
     int channels = 2;
     int samples = 4096;
@@ -31,5 +32,24 @@ juce::AudioBuffer<float>* Helpers::generateMaxAudioSampleBuffer() {
     }
 
     return buffer;
+}
+
+juce::MemoryMappedAudioFormatReader* Helpers::readSineSweep() {
+    juce::AudioFormatManager formatManager;
+    formatManager.registerBasicFormats();
+    juce::AudioFormat *audioFormat = formatManager.getDefaultFormat();
+
+//Previous read
+    /*juce::AudioFormatReader *reader = formatManager.createReaderFor(juce::File("samples/halfsweep.wav"));*/
+//New read
+    juce::MemoryMappedAudioFormatReader *reader = audioFormat->createMemoryMappedReader(juce::File("samples/CSC_sweep_20-20k.wav"));
+    reader->mapEntireFile();
+    //reader->mapSectionOfFile(juce::Range<juce::int64> (0, reader->sampleRate * 1));
+//juce::AudioFormatReader *reader = formatManager.createReaderFor(juce::File("samples/minisweep.wav"));
+
+    return reader;
+    /*AudioSampleBuffer buffer;
+    reader->read(buffer, 0, reader->lengthInSamples, 0, true, true);
+    delete reader; */
 }
 

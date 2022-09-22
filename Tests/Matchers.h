@@ -122,9 +122,10 @@ public:
         ss << "Other buffer has higher total energy";
         return ss.str();
     }
-private:
+
     static constexpr auto fftOrder = 10;
     static constexpr auto fftSize  = 1 << fftOrder;
+private:
 
     juce::dsp::WindowingFunction<float> window;
     juce::dsp::FFT forwardFFT;

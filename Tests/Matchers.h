@@ -73,7 +73,7 @@ public:
                 {
                         if (! nextFFTBlockReady)    // [9]
                         {
-			WARN(fifoIndex);
+			//WARN(fifoIndex);
                            std::fill (inFftData.begin(), inFftData.end(), 0.0f);
                            std::copy (inFifo.begin(), inFifo.end(), inFftData.begin());
                            /*std::fill (othFftData.begin(), othFftData.end(), 0.0f);
@@ -94,7 +94,7 @@ public:
                     //forwardFFT.performFrequencyOnlyForwardTransform (othFftData.data(), true);
 		    amountOfTransforms++;
                     for(int fftIndex = 0; fftIndex < inFftData.size() / 2; fftIndex = fftIndex + 1) {
-                        WARN("IN  Value: " << inFftData[fftIndex] << "  " << fftIndex);
+                        //WARN("IN  Value: " << inFftData[fftIndex] << "  " << fftIndex);
 			inPower += inFftData[fftIndex];
                     }
                     //for(int fftIndex = 0; fftIndex < othFftData.size() / 2; fftIndex = fftIndex + 1) {
@@ -102,7 +102,7 @@ public:
                     //    inPower += othFftData[fftIndex];
                     //}
 		    nextFFTBlockReady = false;
-		    WARN(amountOfTransforms);
+		    //WARN(amountOfTransforms);
 
 		    /*if (inPower > othPower) {
 		        inPower = 0;

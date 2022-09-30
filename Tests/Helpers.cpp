@@ -3,6 +3,7 @@
 juce::AudioBuffer<float>* Helpers::generateAudioSampleBuffer() {
     int channels = 2;
     int samples = 4096;
+    //int samples = 8192;
     juce::AudioBuffer<float> *buffer = new juce::AudioBuffer<float>(channels, samples);
 
     //Fill with random values ranging from -1 to 1
@@ -16,6 +17,25 @@ juce::AudioBuffer<float>* Helpers::generateAudioSampleBuffer() {
 
     return buffer;
 }
+
+juce::AudioBuffer<float>* Helpers::generateBigAudioSampleBuffer() {
+    int channels = 2;
+    //int samples = 4096;
+    int samples = 4096 * 256;
+    juce::AudioBuffer<float> *buffer = new juce::AudioBuffer<float>(channels, samples);
+
+    //Fill with random values ranging from -1 to 1
+    for (int i = 0; i < channels; i++) {
+        auto* writePointer = buffer->getWritePointer(i);
+        for (int j = 0; j < samples; j++) {
+            //writePointer[i] = (-1.0f + juce::Random::getSystemRandom().nextFloat() * 2.0f);
+            buffer->setSample(i, j, -1.0f + juce::Random::getSystemRandom().nextFloat() * 2.0f);
+        }
+    }
+
+    return buffer;
+}
+
 
 juce::AudioBuffer<float>* Helpers::generateMaxAudioSampleBuffer() {
     int channels = 2;
@@ -42,7 +62,7 @@ juce::MemoryMappedAudioFormatReader* Helpers::readSineSweep() {
 //Previous read
     /*juce::AudioFormatReader *reader = formatManager.createReaderFor(juce::File("samples/halfsweep.wav"));*/
 //New read
-    juce::MemoryMappedAudioFormatReader *reader = audioFormat->createMemoryMappedReader(juce::File("samples/CSC_sweep_20-20k.wav"));
+    juce::MemoryMappedAudioFormatReader *reader = audioFormat->createMemoryMappedReader(juce::File("samples/CSC_sweep_20-20k_amped.wav"));
     reader->mapEntireFile();
     //reader->mapSectionOfFile(juce::Range<juce::int64> (0, reader->sampleRate * 1));
 //juce::AudioFormatReader *reader = formatManager.createReaderFor(juce::File("samples/minisweep.wav"));

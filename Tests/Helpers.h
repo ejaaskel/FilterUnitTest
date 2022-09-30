@@ -6,6 +6,7 @@
 class Helpers {
     public:
         static juce::AudioBuffer<float>* generateAudioSampleBuffer();
+        static juce::AudioBuffer<float>* generateBigAudioSampleBuffer();
         static juce::AudioBuffer<float>* generateMaxAudioSampleBuffer();
         static juce::MemoryMappedAudioFormatReader* readSineSweep();
 };

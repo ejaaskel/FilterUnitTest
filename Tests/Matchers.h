@@ -67,17 +67,14 @@ public:
 	    for (int sam = 0; sam < in.getNumSamples(); ++sam) {
                 float inSample = inRead[ch][sam];
                 float othSample = othRead[ch][sam];
-//WARN(inSample);
-//WARN(othSample);
                 if (fifoIndex == fftSize)       // [8]
                 {
                         if (! nextFFTBlockReady)    // [9]
                         {
-			//WARN(fifoIndex);
                            std::fill (inFftData.begin(), inFftData.end(), 0.0f);
                            std::copy (inFifo.begin(), inFifo.end(), inFftData.begin());
-                           /*std::fill (othFftData.begin(), othFftData.end(), 0.0f);
-                           std::copy (othFifo.begin(), othFifo.end(), othFftData.begin());*/
+                           std::fill (othFftData.begin(), othFftData.end(), 0.0f);
+                           std::copy (othFifo.begin(), othFifo.end(), othFftData.begin());
                            nextFFTBlockReady = true;
                         }
  
@@ -85,36 +82,37 @@ public:
                 }
 		//WARN(fifoIndex);
                 inFifo[(size_t) fifoIndex] = inSample;
-                //othFifo[(size_t) fifoIndex] = othSample;
+                othFifo[(size_t) fifoIndex] = othSample;
 		fifoIndex = fifoIndex + 1;
                 if (nextFFTBlockReady) {
                     //window.multiplyWithWindowingTable (inFftData, fftSize);
                     forwardFFT.performFrequencyOnlyForwardTransform (inFftData.data(), true);
 		    //forwardFFT.performRealOnlyForwardTransform(inFftData.data(), true);
-                    //forwardFFT.performFrequencyOnlyForwardTransform (othFftData.data(), true);
+                    forwardFFT.performFrequencyOnlyForwardTransform (othFftData.data(), true);
 		    amountOfTransforms++;
                     for(int fftIndex = 0; fftIndex < inFftData.size() / 2; fftIndex = fftIndex + 1) {
                         //WARN("IN  Value: " << inFftData[fftIndex] << "  " << fftIndex);
 			inPower += inFftData[fftIndex];
                     }
-                    //for(int fftIndex = 0; fftIndex < othFftData.size() / 2; fftIndex = fftIndex + 1) {
+                    for(int fftIndex = 0; fftIndex < othFftData.size() / 2; fftIndex = fftIndex + 1) {
                     //    WARN("OTH Value: " << othFftData[fftIndex]);
-                    //    inPower += othFftData[fftIndex];
-                    //}
+                        othPower += othFftData[fftIndex];
+                    }
 		    nextFFTBlockReady = false;
 		    //WARN(amountOfTransforms);
 
-		    /*if (inPower > othPower) {
-		        inPower = 0;
-			othPower = 0;
-		    }
-		    else {
-		        return true;
-		    }*/
-		    }
+		}
 	    }
         }
-        return false;
+        if (inPower > othPower) {
+            inPower = 0;
+            othPower = 0;
+	    return true;
+        }
+        else {
+	    return false;
+        }
+        //return false;
     }
 
     std::string describe() const override {

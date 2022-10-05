@@ -73,3 +73,69 @@ juce::MemoryMappedAudioFormatReader* Helpers::readSineSweep() {
     delete reader; */
 }
 
+void Helpers::writeBufferToFile(juce::AudioBuffer<float>* buffer, juce::String path) {
+    juce::File bufferFile = juce::File(path);
+juce::TemporaryFile tempFile (bufferFile);
+juce::FileOutputStream output (bufferFile);
+ 
+output.setNewLineString("\n");
+
+output.writeInt(buffer->getNumChannels());
+output.writeInt(buffer->getNumSamples());
+
+for (int i = 0; i < buffer->getNumChannels(); i++) {
+    for (int j = 0; j < buffer->getNumSamples(); j++) {
+        output.writeFloat(buffer->getSample(i,j));
+    }
+}
+
+output.flush(); // (called explicitly to force an fsync on posix)
+
+if (output.getStatus().failed())
+{
+    WARN ("An error occurred in the FileOutputStream");
+    // ... some other error handling
+}
+
+
+}
+
+juce::AudioBuffer<float>* Helpers::readBufferFromFile(juce::String path) {
+    juce::File bufferFile = juce::File(path);
+
+juce::FileInputStream input (bufferFile);
+
+if (! input.openedOk())
+{
+    DBG("Failed to open file");
+    // ... Error handling here
+}
+    
+/*bool readWholeFile = true;
+if (readWholeFile)
+{
+    String content = input->readString();
+    // ... Do your stuff. New lines are normally seperated by "\n"
+}
+else
+{
+    while (! input->isExhausted())
+    {*/
+        int numChannels = input.readInt();
+int numSamples = input.readInt();
+        // ... Do something with each line
+/*    }
+}*/
+
+
+    juce::AudioBuffer<float> *buffer = new juce::AudioBuffer<float>(numChannels, numSamples);
+for (int i = 0; i < buffer->getNumChannels(); i++) {
+    for (int j = 0; j < buffer->getNumSamples(); j++) {
+        buffer->setSample(i, j, input.readFloat());
+    }
+}
+    return buffer;
+
+
+}
+

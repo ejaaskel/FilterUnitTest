@@ -8,7 +8,7 @@ public:
     Filter() {
         auto& preFilter = processorChain.template get<preFilterIndex>();
         preFilter.setMode(juce::dsp::LadderFilterMode::HPF12);
-        preFilter.setCutoffFrequencyHz (1000);
+        preFilter.setCutoffFrequencyHz (10000);
         preFilter.setResonance         (0.0f);
         preFilter.setDrive (juce::Decibels::decibelsToGain (0));
     }

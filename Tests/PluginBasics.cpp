@@ -58,43 +58,43 @@ TEST_CASE("Wet Parameter", "[parameters]")
     juce::AudioBuffer<float> *buffer = Helpers::generateAudioSampleBuffer();
     juce::AudioBuffer<float> originalBuffer(2, buffer->getNumSamples());
     ImageProcessing::drawAudioBufferImage(buffer, "RandomWet");
-  
+
     for (int ch = 0; ch < buffer->getNumChannels(); ++ch)
         originalBuffer.copyFrom (ch, 0, *buffer, ch, 0, buffer->getNumSamples());
-  
+
     juce::MidiBuffer midiBuffer;
-  
+
     testPluginProcessor->prepareToPlay(44100, 4096);
     testPluginProcessor->processBlock(*buffer, midiBuffer);
-  
+
     CHECK_THAT(*buffer,
                !AudioBuffersMatch(originalBuffer));
-  
-    buffer = Helpers::generateAudioSampleBuffer(); 
+
+    buffer = Helpers::generateAudioSampleBuffer();
     auto *parameters = testPluginProcessor->getParameters();
-    juce::RangedAudioParameter* pParam = parameters->getParameter ( "WET"  ); 
-    pParam->setValueNotifyingHost( 0.0f ); 
-  
+    juce::RangedAudioParameter* pParam = parameters->getParameter ( "WET"  );
+    pParam->setValueNotifyingHost( 0.0f );
+
     for (int ch = 0; ch < buffer->getNumChannels(); ++ch)
         originalBuffer.copyFrom (ch, 0, *buffer, ch, 0, buffer->getNumSamples());
     testPluginProcessor->processBlock(*buffer, midiBuffer);
-  
+
     CHECK_THAT(*buffer,
                AudioBuffersMatch(originalBuffer));
-  
+
     buffer = Helpers::generateAudioSampleBuffer();
-    pParam->setValueNotifyingHost( 1.0f ); 
-  
-  
+    pParam->setValueNotifyingHost( 1.0f );
+
+
     for (int ch = 0; ch < buffer->getNumChannels(); ++ch)
         originalBuffer.copyFrom (ch, 0, *buffer, ch, 0, buffer->getNumSamples());
     testPluginProcessor->processBlock(*buffer, midiBuffer);
-  
+
     CHECK_THAT(*buffer,
                !AudioBuffersMatch(originalBuffer));
-  
+
     ImageProcessing::drawAudioBufferImage(buffer, "RandomWet1");
-    
+
     delete testPluginProcessor;
 }
 
@@ -105,14 +105,14 @@ TEST_CASE("Big Wet Parameter", "[parameters]")
     juce::AudioBuffer<float> *buffer = Helpers::generateBigAudioSampleBuffer();
     juce::AudioBuffer<float> originalBuffer(2, buffer->getNumSamples());
     ImageProcessing::drawAudioBufferImage(buffer, "RandomWet");
-  
+
     for (int ch = 0; ch < buffer->getNumChannels(); ++ch)
         originalBuffer.copyFrom (ch, 0, *buffer, ch, 0, buffer->getNumSamples());
-  
+
     juce::MidiBuffer midiBuffer;
-  
+
     int blockCount = buffer->getNumSamples() / 4096;
-  
+
     testPluginProcessor->prepareToPlay(44100, 4096);
     for (int i = 0; i < blockCount; i++) {
         juce::AudioBuffer<float> *processBuffer = new juce::AudioBuffer<float>(1, 4096);
@@ -121,15 +121,15 @@ TEST_CASE("Big Wet Parameter", "[parameters]")
         buffer->copyFrom(0, i * 4096, *processBuffer, 0, 0, 4096);
     }
     ImageProcessing::drawAudioBufferImage(buffer, "RandomWet1");
-  
+
     CHECK_THAT(*buffer,
                !AudioBuffersMatch(originalBuffer));
-  
-    buffer = Helpers::generateBigAudioSampleBuffer(); 
+
+    buffer = Helpers::generateBigAudioSampleBuffer();
     auto *parameters = testPluginProcessor->getParameters();
-    juce::RangedAudioParameter* pParam = parameters->getParameter ( "WET"  ); 
-    pParam->setValueNotifyingHost( 0.0f ); 
-  
+    juce::RangedAudioParameter* pParam = parameters->getParameter ( "WET"  );
+    pParam->setValueNotifyingHost( 0.0f );
+
     for (int ch = 0; ch < buffer->getNumChannels(); ++ch)
         originalBuffer.copyFrom (ch, 0, *buffer, ch, 0, buffer->getNumSamples());
     for (int i = 0; i < blockCount; i++) {
@@ -139,14 +139,14 @@ TEST_CASE("Big Wet Parameter", "[parameters]")
         buffer->copyFrom(0, i * 4096, *processBuffer, 0, 0, 4096);
     }
     ImageProcessing::drawAudioBufferImage(buffer, "RandomWet2");
-  
+
     CHECK_THAT(*buffer,
                AudioBuffersMatch(originalBuffer));
-  
+
     buffer = Helpers::generateBigAudioSampleBuffer();
-    pParam->setValueNotifyingHost( 1.0f ); 
-  
-  
+    pParam->setValueNotifyingHost( 1.0f );
+
+
     for (int ch = 0; ch < buffer->getNumChannels(); ++ch)
         originalBuffer.copyFrom (ch, 0, *buffer, ch, 0, buffer->getNumSamples());
     for (int i = 0; i < blockCount; i++) {
@@ -155,12 +155,12 @@ TEST_CASE("Big Wet Parameter", "[parameters]")
         testPluginProcessor->processBlock(*processBuffer, midiBuffer);
         buffer->copyFrom(0, i * 4096, *processBuffer, 0, 0, 4096);
     }
-  
+
     CHECK_THAT(*buffer,
                !AudioBuffersMatch(originalBuffer));
-  
+
     ImageProcessing::drawAudioBufferImage(buffer, "RandomWet3");
-    
+
     delete testPluginProcessor;
 }
 
@@ -175,19 +175,19 @@ TEST_CASE("Filter Parameter", "[parameters]")
     juce::AudioBuffer<float> originalBuffer(buffer->getNumChannels(), buffer->getNumSamples());
     reader->read(buffer->getArrayOfWritePointers(), 1, 0, reader->lengthInSamples);
     int chunkAmount = buffer->getNumSamples() / 4096;
-  
+
     ImageProcessing::drawAudioBufferImage(buffer, "RandomFilter");
-  
-  
+
+
     for (int ch = 0; ch < buffer->getNumChannels(); ++ch)
         originalBuffer.copyFrom (ch, 0, *buffer, ch, 0, buffer->getNumSamples());
-  
+
     CHECK_THAT(*buffer,
                AudioBuffersMatch(originalBuffer));
-  
-  
+
+
     juce::MidiBuffer midiBuffer;
-  
+
     testPluginProcessor->prepareToPlay(44100, 4096);
     for (int i = 0; i < chunkAmount; i++) {
         juce::AudioBuffer<float> *processBuffer = new juce::AudioBuffer<float>(1, 4096);
@@ -196,12 +196,12 @@ TEST_CASE("Filter Parameter", "[parameters]")
         testPluginProcessor->processBlock(*processBuffer, midiBuffer);
         buffer->copyFrom(0, i * 4096, *processBuffer, 0, 0, 4096);
     }
-  
+
     CHECK_THAT(originalBuffer,
                AudioBufferHigherEnergy(*buffer));
-  
+
     ImageProcessing::drawAudioBufferImage(buffer, "RandomFilter1");
-  
+
     delete testPluginProcessor;
 }
 
@@ -210,19 +210,19 @@ TEST_CASE("Processblock Benchmark", "[benchmarking]")
     testPluginProcessor = new AudioPluginAudioProcessor();
     juce::AudioBuffer<float> *buffer = Helpers::generateAudioSampleBuffer();
     juce::AudioBuffer<float> originalBuffer(2, buffer->getNumSamples());
-  
+
     for (int ch = 0; ch < buffer->getNumChannels(); ++ch)
         originalBuffer.copyFrom (ch, 0, *buffer, ch, 0, buffer->getNumSamples());
-  
+
     juce::MidiBuffer midiBuffer;
-  
+
     testPluginProcessor->prepareToPlay(44100, 4096);
-  
+
     //Example of a simple benchmark
     BENCHMARK("Plugin Processor Processblock") {
-        return testPluginProcessor->processBlock(*buffer, midiBuffer); 
+        return testPluginProcessor->processBlock(*buffer, midiBuffer);
     };
-  
+
     //Example of an advanced benchmark with varying random input
     BENCHMARK_ADVANCED("Plugin Processor Processblock ADVANCED")(Catch::Benchmark::Chronometer meter) {
         int run_amount = meter.runs();
@@ -232,8 +232,8 @@ TEST_CASE("Processblock Benchmark", "[benchmarking]")
         }
         meter.measure([&v, midiBuffer] (int i) mutable { return testPluginProcessor->processBlock(v.getReference(i), midiBuffer); });
     };
-  
-  
+
+
     delete testPluginProcessor;
 }
 

@@ -4,8 +4,7 @@
 
 #include "Filter.h"
 
-class AudioPluginAudioProcessor : public juce::AudioProcessor
-{
+class AudioPluginAudioProcessor : public juce::AudioProcessor {
 public:
     AudioPluginAudioProcessor();
     ~AudioPluginAudioProcessor() override;
@@ -40,7 +39,7 @@ public:
 
 private:
     juce::AudioProcessorValueTreeState parameters;
-    std::atomic<float>* wetParameter = nullptr; 
+    std::atomic<float>* wetParameter = nullptr;
 
     juce::AudioSampleBuffer scratchBuffer;
 

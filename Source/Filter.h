@@ -1,8 +1,7 @@
 #include "juce_dsp/juce_dsp.h"
 
 template <typename Type>
-class Filter
-{
+class Filter {
 public:
     //==============================================================================
     Filter() {
@@ -14,16 +13,14 @@ public:
     }
 
     //==============================================================================
-    void prepare (const juce::dsp::ProcessSpec& spec)
-    {
+    void prepare (const juce::dsp::ProcessSpec& spec) {
         processorChain.prepare(spec);
-	sampleRate = spec.sampleRate;
+        sampleRate = spec.sampleRate;
     }
 
     //==============================================================================
     template <typename ProcessContext>
-    void process (const ProcessContext& context) noexcept
-    {
+    void process (const ProcessContext& context) noexcept {
         processorChain.process (context);
     }
 
@@ -34,13 +31,12 @@ public:
 
 private:
     //==============================================================================
-    enum
-    {
+    enum {
         preFilterIndex,
     };
 
     float sampleRate;
 
     juce::dsp::ProcessorChain<juce::dsp::LadderFilter<Type>
-                              > processorChain;
+    > processorChain;
 };

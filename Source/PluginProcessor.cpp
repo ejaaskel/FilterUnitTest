@@ -4,23 +4,22 @@
 //==============================================================================
 AudioPluginAudioProcessor::AudioPluginAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
-     : AudioProcessor (BusesProperties()
-                     #if ! JucePlugin_IsMidiEffect
-                      #if ! JucePlugin_IsSynth
-                       .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
-                      #endif
-                       .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
-                     #endif
-                       ),
+    : AudioProcessor (BusesProperties()
+#if ! JucePlugin_IsMidiEffect
+#if ! JucePlugin_IsSynth
+                      .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
 #endif
-parameters(*this, nullptr, juce::Identifier("VALUETREE"),
-        {
-            std::make_unique<juce::AudioParameterFloat>("WET",
-                                                      "wet",
-                                                      0.0f,
-                                                      1.0f,
-                                                      1.0f)
-        })
+                      .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
+#endif
+                     ),
+#endif
+    parameters(*this, nullptr, juce::Identifier("VALUETREE"), {
+    std::make_unique<juce::AudioParameterFloat>("WET",
+    "wet",
+    0.0f,
+    1.0f,
+    1.0f)
+})
 {
     wetParameter = parameters.getRawParameterValue("WET");
 }
@@ -37,29 +36,29 @@ const juce::String AudioPluginAudioProcessor::getName() const
 
 bool AudioPluginAudioProcessor::acceptsMidi() const
 {
-   #if JucePlugin_WantsMidiInput
+#if JucePlugin_WantsMidiInput
     return true;
-   #else
+#else
     return false;
-   #endif
+#endif
 }
 
 bool AudioPluginAudioProcessor::producesMidi() const
 {
-   #if JucePlugin_ProducesMidiOutput
+#if JucePlugin_ProducesMidiOutput
     return true;
-   #else
+#else
     return false;
-   #endif
+#endif
 }
 
 bool AudioPluginAudioProcessor::isMidiEffect() const
 {
-   #if JucePlugin_IsMidiEffect
+#if JucePlugin_IsMidiEffect
     return true;
-   #else
+#else
     return false;
-   #endif
+#endif
 }
 
 double AudioPluginAudioProcessor::getTailLengthSeconds() const
@@ -70,7 +69,7 @@ double AudioPluginAudioProcessor::getTailLengthSeconds() const
 int AudioPluginAudioProcessor::getNumPrograms()
 {
     return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
-                // so this should be at least 1, even if you're not really implementing programs.
+    // so this should be at least 1, even if you're not really implementing programs.
 }
 
 int AudioPluginAudioProcessor::getCurrentProgram()
@@ -113,28 +112,28 @@ void AudioPluginAudioProcessor::releaseResources()
 
 bool AudioPluginAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
-  #if JucePlugin_IsMidiEffect
+#if JucePlugin_IsMidiEffect
     juce::ignoreUnused (layouts);
     return true;
-  #else
+#else
     // This is the place where you check if the layout is supported.
     // In this template code we only support mono or stereo.
     if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
-     && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
+            && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
         return false;
 
     // This checks if the input layout matches the output layout
-   #if ! JucePlugin_IsSynth
+#if ! JucePlugin_IsSynth
     if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
         return false;
-   #endif
+#endif
 
     return true;
-  #endif
+#endif
 }
 
 void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
-                                              juce::MidiBuffer& midiMessages)
+        juce::MidiBuffer& midiMessages)
 {
     juce::ignoreUnused (midiMessages);
 
@@ -157,8 +156,7 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     // the samples and the outer loop is handling the channels.
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    {
+    for (int channel = 0; channel < totalNumInputChannels; ++channel) {
         auto* channelData = buffer.getWritePointer (channel);
         juce::ignoreUnused (channelData);
         // ..do something to the data...
@@ -177,9 +175,9 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     auto *tmpWritePointers =tmpBuffer.getArrayOfReadPointers();
     for (int ch = 0; ch < buffer.getNumChannels(); ++ch) {
         for (int sam = 0; sam < buffer.getNumSamples(); ++sam) {
-	    writePointers[ch][sam] = (1.0f - *wetParameter) * writePointers[ch][sam];
-	    writePointers[ch][sam] += (*wetParameter) * tmpWritePointers[ch][sam]; 
-	}
+            writePointers[ch][sam] = (1.0f - *wetParameter) * writePointers[ch][sam];
+            writePointers[ch][sam] += (*wetParameter) * tmpWritePointers[ch][sam];
+        }
     }
 }
 
@@ -217,6 +215,7 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
     return new AudioPluginAudioProcessor();
 }
 
-juce::AudioProcessorValueTreeState* AudioPluginAudioProcessor::getParameters() {
+juce::AudioProcessorValueTreeState* AudioPluginAudioProcessor::getParameters()
+{
     return &parameters;
 }

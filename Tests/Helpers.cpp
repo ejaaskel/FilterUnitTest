@@ -1,6 +1,7 @@
 #include "Helpers.h"
 
-juce::AudioBuffer<float>* Helpers::generateAudioSampleBuffer() {
+juce::AudioBuffer<float>* Helpers::generateAudioSampleBuffer()
+{
     int channels = 2;
     int samples = 4096;
     juce::AudioBuffer<float> *buffer = new juce::AudioBuffer<float>(channels, samples);
@@ -16,7 +17,8 @@ juce::AudioBuffer<float>* Helpers::generateAudioSampleBuffer() {
     return buffer;
 }
 
-juce::AudioBuffer<float>* Helpers::generateBigAudioSampleBuffer() {
+juce::AudioBuffer<float>* Helpers::generateBigAudioSampleBuffer()
+{
     int channels = 2;
     int samples = 4096 * 256;
     juce::AudioBuffer<float> *buffer = new juce::AudioBuffer<float>(channels, samples);
@@ -33,7 +35,8 @@ juce::AudioBuffer<float>* Helpers::generateBigAudioSampleBuffer() {
 }
 
 
-juce::AudioBuffer<float>* Helpers::generateMaxAudioSampleBuffer() {
+juce::AudioBuffer<float>* Helpers::generateMaxAudioSampleBuffer()
+{
     int channels = 2;
     int samples = 4096;
     juce::AudioBuffer<float> *buffer = new juce::AudioBuffer<float>(channels, samples);
@@ -49,7 +52,8 @@ juce::AudioBuffer<float>* Helpers::generateMaxAudioSampleBuffer() {
     return buffer;
 }
 
-juce::MemoryMappedAudioFormatReader* Helpers::readSineSweep() {
+juce::MemoryMappedAudioFormatReader* Helpers::readSineSweep()
+{
     juce::AudioFormatManager formatManager;
     formatManager.registerBasicFormats();
     juce::AudioFormat *audioFormat = formatManager.getDefaultFormat();
@@ -60,10 +64,11 @@ juce::MemoryMappedAudioFormatReader* Helpers::readSineSweep() {
     return reader;
 }
 
-void Helpers::writeBufferToFile(juce::AudioBuffer<float>* buffer, juce::String path) {
+void Helpers::writeBufferToFile(juce::AudioBuffer<float>* buffer, juce::String path)
+{
     juce::File bufferFile = juce::File(path);
     juce::FileOutputStream output (bufferFile);
- 
+
     output.setNewLineString("\n");
 
     output.writeInt(buffer->getNumChannels());
@@ -84,7 +89,8 @@ void Helpers::writeBufferToFile(juce::AudioBuffer<float>* buffer, juce::String p
     }*/
 }
 
-juce::AudioBuffer<float>* Helpers::readBufferFromFile(juce::String path) {
+juce::AudioBuffer<float>* Helpers::readBufferFromFile(juce::String path)
+{
     juce::File bufferFile = juce::File(path);
 
     juce::FileInputStream input (bufferFile);
@@ -94,7 +100,7 @@ juce::AudioBuffer<float>* Helpers::readBufferFromFile(juce::String path) {
         DBG("Failed to open file");
         // ... Error handling here
     }*/
-    
+
     int numChannels = input.readInt();
     int numSamples = input.readInt();
 

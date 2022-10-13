@@ -9,19 +9,19 @@ public:
 
     bool match(juce::AudioBuffer<float> const& in) const override {
         //return in >= m_begin && in <= m_end;
-	auto *inRead = in.getArrayOfReadPointers();
-	auto *othRead = otherBuffer.getArrayOfReadPointers();
+        auto *inRead = in.getArrayOfReadPointers();
+        auto *othRead = otherBuffer.getArrayOfReadPointers();
 
         if (in.getNumChannels() != otherBuffer.getNumChannels() || in.getNumSamples() != otherBuffer.getNumSamples()) {
-	    return false;
-	}
+            return false;
+        }
 
-        for (int ch = 0; ch < in.getNumChannels(); ++ch){
-	    for (int sam = 0; sam < in.getNumSamples(); ++sam) {
-	        if (std::fabs(inRead[ch][sam] - othRead[ch][sam]) > std::numeric_limits<float>::epsilon()) {
-		    return false;
-		}
-	    }
+        for (int ch = 0; ch < in.getNumChannels(); ++ch) {
+            for (int sam = 0; sam < in.getNumSamples(); ++sam) {
+                if (std::fabs(inRead[ch][sam] - othRead[ch][sam]) > std::numeric_limits<float>::epsilon()) {
+                    return false;
+                }
+            }
         }
 
         return true;
@@ -34,7 +34,8 @@ public:
     }
 };
 
-AudioBufferMatcher AudioBuffersMatch(juce::AudioBuffer<float> other) {
+AudioBufferMatcher AudioBuffersMatch(juce::AudioBuffer<float> other)
+{
     return { other };
 }
 
@@ -44,8 +45,8 @@ public:
     AudioBufferEnergyMatcher(juce::AudioBuffer<float> other) : otherBuffer(other), forwardFFT (fftOrder), window { fftSize, juce::dsp::WindowingFunction<float>::WindowingMethod::hann } {}
 
     bool match(juce::AudioBuffer<float> const& in) const override {
-	auto *inRead = in.getArrayOfReadPointers();
-	auto *othRead = otherBuffer.getArrayOfReadPointers();
+        auto *inRead = in.getArrayOfReadPointers();
+        auto *othRead = otherBuffer.getArrayOfReadPointers();
 
         std::array<float, fftSize> inFifo;
         std::array<float, fftSize * 2> inFftData;
@@ -56,61 +57,58 @@ public:
         int amountOfTransforms = 0;
 
         float inPower = 0;
-	float othPower = 0;
+        float othPower = 0;
 
         if (in.getNumChannels() != otherBuffer.getNumChannels() || in.getNumSamples() != otherBuffer.getNumSamples()) {
-	    return false;
-	}
+            return false;
+        }
 
 
-        for (int ch = 0; ch < in.getNumChannels(); ++ch){
-	    for (int sam = 0; sam < in.getNumSamples(); ++sam) {
+        for (int ch = 0; ch < in.getNumChannels(); ++ch) {
+            for (int sam = 0; sam < in.getNumSamples(); ++sam) {
                 float inSample = inRead[ch][sam];
                 float othSample = othRead[ch][sam];
-                if (fifoIndex == fftSize)       // [8]
-                {
-                        if (! nextFFTBlockReady)    // [9]
-                        {
-                           std::fill (inFftData.begin(), inFftData.end(), 0.0f);
-                           std::copy (inFifo.begin(), inFifo.end(), inFftData.begin());
-                           std::fill (othFftData.begin(), othFftData.end(), 0.0f);
-                           std::copy (othFifo.begin(), othFifo.end(), othFftData.begin());
-                           nextFFTBlockReady = true;
-                        }
- 
+                if (fifoIndex == fftSize) {     // [8]
+                    if (! nextFFTBlockReady) {  // [9]
+                        std::fill (inFftData.begin(), inFftData.end(), 0.0f);
+                        std::copy (inFifo.begin(), inFifo.end(), inFftData.begin());
+                        std::fill (othFftData.begin(), othFftData.end(), 0.0f);
+                        std::copy (othFifo.begin(), othFifo.end(), othFftData.begin());
+                        nextFFTBlockReady = true;
+                    }
+
                     fifoIndex = 0;
                 }
-		//WARN(fifoIndex);
+                //WARN(fifoIndex);
                 inFifo[(size_t) fifoIndex] = inSample;
                 othFifo[(size_t) fifoIndex] = othSample;
-		fifoIndex = fifoIndex + 1;
+                fifoIndex = fifoIndex + 1;
                 if (nextFFTBlockReady) {
                     //window.multiplyWithWindowingTable (inFftData, fftSize);
                     forwardFFT.performFrequencyOnlyForwardTransform (inFftData.data(), true);
-		    //forwardFFT.performRealOnlyForwardTransform(inFftData.data(), true);
+                    //forwardFFT.performRealOnlyForwardTransform(inFftData.data(), true);
                     forwardFFT.performFrequencyOnlyForwardTransform (othFftData.data(), true);
-		    amountOfTransforms++;
+                    amountOfTransforms++;
                     for(int fftIndex = 0; fftIndex < inFftData.size() / 2; fftIndex = fftIndex + 1) {
                         //WARN("IN  Value: " << inFftData[fftIndex] << "  " << fftIndex);
-			inPower += inFftData[fftIndex];
+                        inPower += inFftData[fftIndex];
                     }
                     for(int fftIndex = 0; fftIndex < othFftData.size() / 2; fftIndex = fftIndex + 1) {
-                    //    WARN("OTH Value: " << othFftData[fftIndex]);
+                        //    WARN("OTH Value: " << othFftData[fftIndex]);
                         othPower += othFftData[fftIndex];
                     }
-		    nextFFTBlockReady = false;
-		    //WARN(amountOfTransforms);
+                    nextFFTBlockReady = false;
+                    //WARN(amountOfTransforms);
 
-		}
-	    }
+                }
+            }
         }
         if (inPower > othPower) {
             inPower = 0;
             othPower = 0;
-	    return true;
-        }
-        else {
-	    return false;
+            return true;
+        } else {
+            return false;
         }
         //return false;
     }
@@ -130,7 +128,8 @@ private:
 
 };
 
-AudioBufferEnergyMatcher AudioBufferHigherEnergy(juce::AudioBuffer<float> other) {
+AudioBufferEnergyMatcher AudioBufferHigherEnergy(juce::AudioBuffer<float> other)
+{
     return { other };
 }
 

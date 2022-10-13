@@ -4,12 +4,12 @@
 #include <catch2/catch_all.hpp>
 
 class Helpers {
-    public:
-        static juce::AudioBuffer<float>* generateAudioSampleBuffer();
-        static juce::AudioBuffer<float>* generateBigAudioSampleBuffer();
-        static juce::AudioBuffer<float>* generateMaxAudioSampleBuffer();
-        static juce::MemoryMappedAudioFormatReader* readSineSweep();
-        static void writeBufferToFile(juce::AudioBuffer<float>* buffer, juce::String path);
-        static juce::AudioBuffer<float>* readBufferFromFile(juce::String path);
+public:
+    static juce::AudioBuffer<float>* generateAudioSampleBuffer();
+    static juce::AudioBuffer<float>* generateBigAudioSampleBuffer();
+    static juce::AudioBuffer<float>* generateMaxAudioSampleBuffer();
+    static juce::MemoryMappedAudioFormatReader* readSineSweep();
+    static void writeBufferToFile(juce::AudioBuffer<float>* buffer, juce::String path);
+    static juce::AudioBuffer<float>* readBufferFromFile(juce::String path);
 
 };

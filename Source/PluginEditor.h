@@ -3,8 +3,7 @@
 #include "PluginProcessor.h"
 
 //==============================================================================
-class AudioPluginAudioProcessorEditor  : public juce::AudioProcessorEditor
-{
+class AudioPluginAudioProcessorEditor  : public juce::AudioProcessorEditor {
 public:
     explicit AudioPluginAudioProcessorEditor (AudioPluginAudioProcessor&);
     ~AudioPluginAudioProcessorEditor() override;

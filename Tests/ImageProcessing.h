@@ -5,10 +5,10 @@
 #include "Settings.h"
 
 class ImageProcessing {
-    public:
-        static void drawAudioFormatReaderImage(juce::MemoryMappedAudioFormatReader* reader, juce::String imageName);
-        static float calculateFFTMaxValue(juce::AudioBuffer<float>* bufferToCalculate);
-        static void drawAudioBufferImage(juce::AudioBuffer<float>* bufferToDraw, juce::String imageName);
-    private:
-        static void drawScale(juce::Image spectrogramImage);
+public:
+    static void drawAudioFormatReaderImage(juce::MemoryMappedAudioFormatReader* reader, juce::String imageName);
+    static float calculateFFTMaxValue(juce::AudioBuffer<float>* bufferToCalculate);
+    static void drawAudioBufferImage(juce::AudioBuffer<float>* bufferToDraw, juce::String imageName);
+private:
+    static void drawScale(juce::Image spectrogramImage);
 };

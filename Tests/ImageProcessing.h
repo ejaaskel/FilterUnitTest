@@ -9,4 +9,6 @@ class ImageProcessing {
         static void drawAudioFormatReaderImage(juce::MemoryMappedAudioFormatReader* reader, juce::String imageName);
         static float calculateFFTMaxValue(juce::AudioBuffer<float>* bufferToCalculate);
         static void drawAudioBufferImage(juce::AudioBuffer<float>* bufferToDraw, juce::String imageName);
+    private:
+        static void drawScale(juce::Image spectrogramImage);
 };

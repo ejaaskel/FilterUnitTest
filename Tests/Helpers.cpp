@@ -35,13 +35,13 @@ juce::AudioBuffer<float>* Helpers::generateBigAudioSampleBuffer()
 }
 
 
-juce::AudioBuffer<float>* Helpers::generateMaxAudioSampleBuffer()
+juce::AudioBuffer<float>* Helpers::generateIncreasingAudioSampleBuffer()
 {
     int channels = 2;
     int samples = 4096;
     juce::AudioBuffer<float> *buffer = new juce::AudioBuffer<float>(channels, samples);
 
-    //Fill with random values ranging from -1 to 1
+    //Fill with increasing values ranging from -1 to 1
     for (int i = 0; i < channels; i++) {
         auto* writePointer = buffer->getWritePointer(i);
         for (int j = 0; j < samples; j++) {

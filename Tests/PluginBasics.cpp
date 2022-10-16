@@ -99,7 +99,7 @@ TEST_CASE("Wet Parameter", "[parameters]")
 }
 
 
-TEST_CASE("Big Wet Parameter", "[parameters]")
+TEST_CASE("Big Buffer Wet Parameter", "[parameters]")
 {
     testPluginProcessor = new AudioPluginAudioProcessor();
     juce::AudioBuffer<float> *buffer = Helpers::generateBigAudioSampleBuffer();
@@ -163,9 +163,6 @@ TEST_CASE("Big Wet Parameter", "[parameters]")
 
     delete testPluginProcessor;
 }
-
-
-
 
 TEST_CASE("Filter Parameter", "[parameters]")
 {

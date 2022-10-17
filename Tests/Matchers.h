@@ -89,11 +89,11 @@ public:
                     //forwardFFT.performRealOnlyForwardTransform(inFftData.data(), true);
                     forwardFFT.performFrequencyOnlyForwardTransform (othFftData.data(), true);
                     amountOfTransforms++;
-                    for(int fftIndex = 0; fftIndex < inFftData.size() / 2; fftIndex = fftIndex + 1) {
+                    for(long unsigned int fftIndex = 0; fftIndex < inFftData.size() / 2; fftIndex = fftIndex + 1) {
                         //WARN("IN  Value: " << inFftData[fftIndex] << "  " << fftIndex);
                         inPower += inFftData[fftIndex];
                     }
-                    for(int fftIndex = 0; fftIndex < othFftData.size() / 2; fftIndex = fftIndex + 1) {
+                    for(long unsigned int fftIndex = 0; fftIndex < othFftData.size() / 2; fftIndex = fftIndex + 1) {
                         //    WARN("OTH Value: " << othFftData[fftIndex]);
                         othPower += othFftData[fftIndex];
                     }

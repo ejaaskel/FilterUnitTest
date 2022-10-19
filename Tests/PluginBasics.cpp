@@ -28,8 +28,8 @@ TEST_CASE("AudioBuffer is not higher than itself", "[dummy]")
 TEST_CASE("Draw Sine Sweep", "[dummy]")
 {
     juce::MemoryMappedAudioFormatReader *reader = Helpers::readSineSweep();
-    juce::AudioBuffer<float> *buffer = new juce::AudioBuffer<float>((unsigned int)reader->numChannels, reader->lengthInSamples);
-    reader->read(buffer, (unsigned int)reader->numChannels, reader->lengthInSamples, 0, true, true);
+    juce::AudioBuffer<float> *buffer = new juce::AudioBuffer<float>(reader->numChannels, reader->lengthInSamples);
+    reader->read(buffer, reader->numChannels, reader->lengthInSamples, 0, true, true);
     ImageProcessing::drawAudioBufferImage(buffer, "SineSweep1");
 }
 
@@ -168,7 +168,7 @@ TEST_CASE("Filter Parameter", "[parameters]")
 {
     testPluginProcessor = new AudioPluginAudioProcessor();
     juce::MemoryMappedAudioFormatReader *reader = Helpers::readSineSweep();
-    juce::AudioBuffer<float> *buffer = new juce::AudioBuffer<float>((unsigned int)reader->numChannels, reader->lengthInSamples);
+    juce::AudioBuffer<float> *buffer = new juce::AudioBuffer<float>(reader->numChannels, reader->lengthInSamples);
     juce::AudioBuffer<float> originalBuffer(buffer->getNumChannels(), buffer->getNumSamples());
     reader->read(buffer->getArrayOfWritePointers(), 1, 0, reader->lengthInSamples);
     int chunkAmount = buffer->getNumSamples() / 4096;

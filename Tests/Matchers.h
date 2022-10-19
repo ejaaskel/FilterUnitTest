@@ -122,9 +122,8 @@ public:
     static constexpr auto fftOrder = 10;
     static constexpr auto fftSize  = 1 << fftOrder;
 private:
-
-    juce::dsp::WindowingFunction<float> window;
     juce::dsp::FFT forwardFFT;
+    juce::dsp::WindowingFunction<float> window;
 
 };
 

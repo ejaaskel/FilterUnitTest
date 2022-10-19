@@ -8,7 +8,6 @@ juce::AudioBuffer<float>* Helpers::generateAudioSampleBuffer()
 
     //Fill with random values ranging from -1 to 1
     for (int i = 0; i < channels; i++) {
-        auto* writePointer = buffer->getWritePointer(i);
         for (int j = 0; j < samples; j++) {
             buffer->setSample(i, j, -1.0f + juce::Random::getSystemRandom().nextFloat() * 2.0f);
         }
@@ -25,7 +24,6 @@ juce::AudioBuffer<float>* Helpers::generateBigAudioSampleBuffer()
 
     //Fill with random values ranging from -1 to 1
     for (int i = 0; i < channels; i++) {
-        auto* writePointer = buffer->getWritePointer(i);
         for (int j = 0; j < samples; j++) {
             buffer->setSample(i, j, -1.0f + juce::Random::getSystemRandom().nextFloat() * 2.0f);
         }
@@ -43,7 +41,6 @@ juce::AudioBuffer<float>* Helpers::generateIncreasingAudioSampleBuffer()
 
     //Fill with increasing values ranging from -1 to 1
     for (int i = 0; i < channels; i++) {
-        auto* writePointer = buffer->getWritePointer(i);
         for (int j = 0; j < samples; j++) {
             buffer->setSample(i, j, juce::jmap((float)(j % 1001), 0.0f, 1000.0f, -1.0f, 1.0f));
         }

@@ -98,9 +98,8 @@ void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need.
-    scratchBuffer.setSize(getNumInputChannels(), samplesPerBlock);
-    juce::dsp::ProcessSpec spec { sampleRate, static_cast<juce::uint32> (samplesPerBlock) };
-    spec.numChannels = getNumOutputChannels();
+    scratchBuffer.setSize(getTotalNumInputChannels(), samplesPerBlock);
+    juce::dsp::ProcessSpec spec { sampleRate, static_cast<juce::uint32> (samplesPerBlock),static_cast<juce::uint32>  (getTotalNumOutputChannels()) };
     fxChain.prepare(spec);
 }
 

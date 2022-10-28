@@ -1,6 +1,6 @@
 #include <juce_audio_processors/juce_audio_processors.h>
+#include "settings.h"
 
-#define FLOAT_ACCURACY 0.000001
 
 class AudioBufferMatcher : public Catch::Matchers::MatcherBase<juce::AudioBuffer<float>> {
     juce::AudioBuffer<float> otherBuffer;
@@ -42,16 +42,16 @@ AudioBufferMatcher AudioBuffersMatch(juce::AudioBuffer<float> other)
 class AudioBufferEnergyMatcher : public Catch::Matchers::MatcherBase<juce::AudioBuffer<float>> {
     juce::AudioBuffer<float> otherBuffer;
 public:
-    AudioBufferEnergyMatcher(juce::AudioBuffer<float> other) : otherBuffer(other), forwardFFT (fftOrder), window { fftSize, juce::dsp::WindowingFunction<float>::WindowingMethod::hann } {}
+    AudioBufferEnergyMatcher(juce::AudioBuffer<float> other) : otherBuffer(other), forwardFFT (fft_order), window { fft_size, juce::dsp::WindowingFunction<float>::WindowingMethod::hann } {}
 
     bool match(juce::AudioBuffer<float> const& in) const override {
         auto *inRead = in.getArrayOfReadPointers();
         auto *othRead = otherBuffer.getArrayOfReadPointers();
 
-        std::array<float, fftSize> inFifo;
-        std::array<float, fftSize * 2> inFftData;
-        std::array<float, fftSize> othFifo;
-        std::array<float, fftSize * 2> othFftData;
+        std::array<float, fft_size> inFifo;
+        std::array<float, fft_size * 2> inFftData;
+        std::array<float, fft_size> othFifo;
+        std::array<float, fft_size * 2> othFftData;
         int fifoIndex = 0;
         bool nextFFTBlockReady = false;
         int amountOfTransforms = 0;
@@ -68,7 +68,7 @@ public:
             for (int sam = 0; sam < in.getNumSamples(); ++sam) {
                 float inSample = inRead[ch][sam];
                 float othSample = othRead[ch][sam];
-                if (fifoIndex == fftSize) {     // [8]
+                if (fifoIndex == fft_size) {     // [8]
                     if (! nextFFTBlockReady) {  // [9]
                         std::fill (inFftData.begin(), inFftData.end(), 0.0f);
                         std::copy (inFifo.begin(), inFifo.end(), inFftData.begin());
@@ -84,7 +84,7 @@ public:
                 othFifo[(size_t) fifoIndex] = othSample;
                 fifoIndex = fifoIndex + 1;
                 if (nextFFTBlockReady) {
-                    //window.multiplyWithWindowingTable (inFftData, fftSize);
+                    //window.multiplyWithWindowingTable (inFftData, fft_size);
                     forwardFFT.performFrequencyOnlyForwardTransform (inFftData.data(), true);
                     //forwardFFT.performRealOnlyForwardTransform(inFftData.data(), true);
                     forwardFFT.performFrequencyOnlyForwardTransform (othFftData.data(), true);
@@ -119,8 +119,8 @@ public:
         return ss.str();
     }
 
-    static constexpr auto fftOrder = 10;
-    static constexpr auto fftSize  = 1 << fftOrder;
+//    static constexpr auto fft_order = 10;
+//    static constexpr auto fft_size  = 1 << fft_order;
 private:
     juce::dsp::FFT forwardFFT;
     juce::dsp::WindowingFunction<float> window;
@@ -131,4 +131,78 @@ AudioBufferEnergyMatcher AudioBufferHigherEnergy(juce::AudioBuffer<float> other)
 {
     return { other };
 }
+
+juce::Array<float> calculateBinEnergies() {
+
+}
+
+class AudioBufferMaxEnergyMatcher : public Catch::Matchers::MatcherBase<juce::AudioBuffer<float>> {
+    juce::Array<float> maxEnergies;
+public:
+    AudioBufferMaxEnergyMatcher(juce::Array<float> other) : maxEnergies(other), forwardFFT (fft_order), window { fft_size, juce::dsp::WindowingFunction<float>::WindowingMethod::hann } {}
+
+    bool match(juce::AudioBuffer<float> const& in) const override {
+        auto *inRead = in.getArrayOfReadPointers();
+
+        std::array<float, fft_size> inFifo;
+        std::array<float, fft_size * 2> inFftData;
+	juce::Array<float> binEnergies;
+        int fifoIndex = 0;
+        bool nextFFTBlockReady = false;
+        int amountOfTransforms = 0;
+
+
+        for (int ch = 0; ch < in.getNumChannels(); ++ch) {
+            for (int sam = 0; sam < in.getNumSamples(); ++sam) {
+                float inSample = inRead[ch][sam];
+                if (fifoIndex == fft_size) {     // [8]
+                    std::fill (inFftData.begin(), inFftData.end(), 0.0f);
+                    std::copy (inFifo.begin(), inFifo.end(), inFftData.begin());
+                    nextFFTBlockReady = true;
+                    forwardFFT.performFrequencyOnlyForwardTransform (inFftData.data(), true);
+                    amountOfTransforms++;
+                    for(long unsigned int fftIndex = 0; fftIndex < inFftData.size() / 2; fftIndex = fftIndex + 1) {
+                        binEnergies.set(fftIndex, binEnergies[fftIndex] + inFftData[fftIndex]);
+			
+                    }
+
+                    fifoIndex = 0;
+                }
+                inFifo[(size_t) fifoIndex] = inSample;
+                fifoIndex = fifoIndex + 1;
+            }
+        }
+	for (int i = 0; i < maxEnergies.size(); i++) {
+            if (maxEnergies[i] == -1) {
+                continue; 
+	    }
+	    if (binEnergies[i] > maxEnergies[i]) {
+	        return false;
+	    }
+	}
+	for (int i =0; i < fft_size / 2; i++) {
+
+            WARN(" " << i << " " << binEnergies[i]);	
+	}
+	WARN(fft_size);
+	WARN(maxEnergies.size());
+        return true;
+    }
+
+    std::string describe() const override {
+        std::ostringstream ss;
+        ss << "Energies too high";
+        return ss.str();
+    }
+private:
+    juce::dsp::FFT forwardFFT;
+    juce::dsp::WindowingFunction<float> window;
+
+};
+
+AudioBufferMaxEnergyMatcher AudioBufferMaxerEnergy(juce::Array<float> maxEnergiesThing)
+{
+    return { maxEnergiesThing };
+}
+
 

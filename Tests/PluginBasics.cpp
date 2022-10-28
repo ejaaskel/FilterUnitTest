@@ -169,6 +169,7 @@ TEST_CASE("Filter Parameter", "[parameters]")
     testPluginProcessor = new AudioPluginAudioProcessor();
     juce::MemoryMappedAudioFormatReader *reader = Helpers::readSineSweep();
     juce::AudioBuffer<float> *buffer = new juce::AudioBuffer<float>(reader->numChannels, reader->lengthInSamples);
+    //juce::AudioBuffer<float> *buffer = Helpers::generate;
     juce::AudioBuffer<float> originalBuffer(buffer->getNumChannels(), buffer->getNumSamples());
     reader->read(buffer->getArrayOfWritePointers(), 1, 0, reader->lengthInSamples);
     int chunkAmount = buffer->getNumSamples() / 4096;
@@ -197,10 +198,24 @@ TEST_CASE("Filter Parameter", "[parameters]")
     CHECK_THAT(originalBuffer,
                AudioBufferHigherEnergy(*buffer));
 
+    juce::Array<float> maxEnergies;
+    for (int i = 0; i < fft_size / 2; i++) {
+        if (i < 32) {
+            maxEnergies.set(i, 100);
+	}
+	else {
+            maxEnergies.set(i, -1);
+	
+	}
+    }
+    CHECK_THAT(*buffer,
+               AudioBufferMaxerEnergy(maxEnergies));
+
     ImageProcessing::drawAudioBufferImage(buffer, "RandomFilter1");
 
     delete testPluginProcessor;
 }
+
 
 TEST_CASE("Processblock Benchmark", "[benchmarking]")
 {

@@ -1,5 +1,35 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 #include "settings.h"
+juce::Array<float> calculateBinEnergies(const juce::dsp::FFT *forwardFFT, juce::AudioBuffer<float> in) {
+        auto *inRead = in.getArrayOfReadPointers();
+
+        std::array<float, fft_size> inFifo;
+        std::array<float, fft_size * 2> inFftData;
+        juce::Array<float> binEnergies;
+        int fifoIndex = 0;
+        int amountOfTransforms = 0;
+        for (int ch = 0; ch < in.getNumChannels(); ++ch) {
+            for (int sam = 0; sam < in.getNumSamples(); ++sam) {
+                float inSample = inRead[ch][sam];
+                if (fifoIndex == fft_size) {     // [8]
+                    std::fill (inFftData.begin(), inFftData.end(), 0.0f);
+                    std::copy (inFifo.begin(), inFifo.end(), inFftData.begin());
+                    forwardFFT->performFrequencyOnlyForwardTransform (inFftData.data(), true);
+                    amountOfTransforms++;
+                    for(long unsigned int fftIndex = 0; fftIndex < inFftData.size() / 2; fftIndex = fftIndex + 1) {
+                        binEnergies.set(fftIndex, binEnergies[fftIndex] + inFftData[fftIndex]);
+			
+                    }
+
+                    fifoIndex = 0;
+                }
+                inFifo[(size_t) fifoIndex] = inSample;
+                fifoIndex = fifoIndex + 1;
+            }
+        }
+	return binEnergies;
+
+}
 
 
 class AudioBufferMatcher : public Catch::Matchers::MatcherBase<juce::AudioBuffer<float>> {
@@ -63,54 +93,20 @@ public:
             return false;
         }
 
+        juce::Array<float> inEnergies = calculateBinEnergies(&forwardFFT, in);
+        juce::Array<float> othEnergies = calculateBinEnergies(&forwardFFT, otherBuffer);
 
-        for (int ch = 0; ch < in.getNumChannels(); ++ch) {
-            for (int sam = 0; sam < in.getNumSamples(); ++sam) {
-                float inSample = inRead[ch][sam];
-                float othSample = othRead[ch][sam];
-                if (fifoIndex == fft_size) {     // [8]
-                    if (! nextFFTBlockReady) {  // [9]
-                        std::fill (inFftData.begin(), inFftData.end(), 0.0f);
-                        std::copy (inFifo.begin(), inFifo.end(), inFftData.begin());
-                        std::fill (othFftData.begin(), othFftData.end(), 0.0f);
-                        std::copy (othFifo.begin(), othFifo.end(), othFftData.begin());
-                        nextFFTBlockReady = true;
-                    }
+	for (int i = 0; i < inEnergies.size(); i++) {
+	    inPower += inEnergies[i];
+	    othPower += othEnergies[i];
+	}
 
-                    fifoIndex = 0;
-                }
-                //WARN(fifoIndex);
-                inFifo[(size_t) fifoIndex] = inSample;
-                othFifo[(size_t) fifoIndex] = othSample;
-                fifoIndex = fifoIndex + 1;
-                if (nextFFTBlockReady) {
-                    //window.multiplyWithWindowingTable (inFftData, fft_size);
-                    forwardFFT.performFrequencyOnlyForwardTransform (inFftData.data(), true);
-                    //forwardFFT.performRealOnlyForwardTransform(inFftData.data(), true);
-                    forwardFFT.performFrequencyOnlyForwardTransform (othFftData.data(), true);
-                    amountOfTransforms++;
-                    for(long unsigned int fftIndex = 0; fftIndex < inFftData.size() / 2; fftIndex = fftIndex + 1) {
-                        //WARN("IN  Value: " << inFftData[fftIndex] << "  " << fftIndex);
-                        inPower += inFftData[fftIndex];
-                    }
-                    for(long unsigned int fftIndex = 0; fftIndex < othFftData.size() / 2; fftIndex = fftIndex + 1) {
-                        //    WARN("OTH Value: " << othFftData[fftIndex]);
-                        othPower += othFftData[fftIndex];
-                    }
-                    nextFFTBlockReady = false;
-                    //WARN(amountOfTransforms);
-
-                }
-            }
-        }
-        if (inPower > othPower) {
-            inPower = 0;
-            othPower = 0;
+        if (inPower < othPower) {
             return true;
-        } else {
+        }
+        else {
             return false;
         }
-        //return false;
     }
 
     std::string describe() const override {
@@ -118,9 +114,6 @@ public:
         ss << "Other buffer has higher total energy";
         return ss.str();
     }
-
-//    static constexpr auto fft_order = 10;
-//    static constexpr auto fft_size  = 1 << fft_order;
 private:
     juce::dsp::FFT forwardFFT;
     juce::dsp::WindowingFunction<float> window;
@@ -132,36 +125,6 @@ AudioBufferEnergyMatcher AudioBufferHigherEnergy(juce::AudioBuffer<float> other)
     return { other };
 }
 
-juce::Array<float> calculateBinEnergies(const juce::dsp::FFT *forwardFFT, juce::AudioBuffer<float> in) {
-        auto *inRead = in.getArrayOfReadPointers();
-
-        std::array<float, fft_size> inFifo;
-        std::array<float, fft_size * 2> inFftData;
-        juce::Array<float> binEnergies;
-        int fifoIndex = 0;
-        int amountOfTransforms = 0;
-        for (int ch = 0; ch < in.getNumChannels(); ++ch) {
-            for (int sam = 0; sam < in.getNumSamples(); ++sam) {
-                float inSample = inRead[ch][sam];
-                if (fifoIndex == fft_size) {     // [8]
-                    std::fill (inFftData.begin(), inFftData.end(), 0.0f);
-                    std::copy (inFifo.begin(), inFifo.end(), inFftData.begin());
-                    forwardFFT->performFrequencyOnlyForwardTransform (inFftData.data(), true);
-                    amountOfTransforms++;
-                    for(long unsigned int fftIndex = 0; fftIndex < inFftData.size() / 2; fftIndex = fftIndex + 1) {
-                        binEnergies.set(fftIndex, binEnergies[fftIndex] + inFftData[fftIndex]);
-			
-                    }
-
-                    fifoIndex = 0;
-                }
-                inFifo[(size_t) fifoIndex] = inSample;
-                fifoIndex = fifoIndex + 1;
-            }
-        }
-	return binEnergies;
-
-}
 
 class AudioBufferMaxEnergyMatcher : public Catch::Matchers::MatcherBase<juce::AudioBuffer<float>> {
     juce::Array<float> maxEnergies;
@@ -180,8 +143,6 @@ public:
 	        return false;
 	    }
 	}
-	WARN(fft_size);
-	WARN(maxEnergies.size());
         return true;
     }
 
@@ -196,9 +157,9 @@ private:
 
 };
 
-AudioBufferMaxEnergyMatcher AudioBufferMaxerEnergy(juce::Array<float> maxEnergiesThing)
+AudioBufferMaxEnergyMatcher AudioBufferCheckMaxEnergy(juce::Array<float> maxEnergiesArray)
 {
-    return { maxEnergiesThing };
+    return { maxEnergiesArray };
 }
 
 class AudioBufferMinEnergyMatcher : public Catch::Matchers::MatcherBase<juce::AudioBuffer<float>> {
@@ -232,8 +193,8 @@ private:
 
 };
 
-AudioBufferMinEnergyMatcher AudioBufferMinerEnergy(juce::Array<float> minEnergiesThing)
+AudioBufferMinEnergyMatcher AudioBufferCheckMinEnergy(juce::Array<float> minEnergiesArray)
 {
-    return { minEnergiesThing };
+    return { minEnergiesArray };
 }
 

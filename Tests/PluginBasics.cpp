@@ -57,7 +57,6 @@ TEST_CASE("Wet Parameter", "[parameters]")
     testPluginProcessor = new AudioPluginAudioProcessor();
     juce::AudioBuffer<float> *buffer = Helpers::generateAudioSampleBuffer();
     juce::AudioBuffer<float> originalBuffer(2, buffer->getNumSamples());
-    ImageProcessing::drawAudioBufferImage(buffer, "RandomWet");
 
     for (int ch = 0; ch < buffer->getNumChannels(); ++ch)
         originalBuffer.copyFrom (ch, 0, *buffer, ch, 0, buffer->getNumSamples());
@@ -67,8 +66,11 @@ TEST_CASE("Wet Parameter", "[parameters]")
     testPluginProcessor->prepareToPlay(44100, 4096);
     testPluginProcessor->processBlock(*buffer, midiBuffer);
 
+    //Check that initial value is not zero, i.e. filtering happens
     CHECK_THAT(*buffer,
                !AudioBuffersMatch(originalBuffer));
+
+    delete buffer;
 
     buffer = Helpers::generateAudioSampleBuffer();
     auto *parameters = testPluginProcessor->getParameters();
@@ -79,8 +81,11 @@ TEST_CASE("Wet Parameter", "[parameters]")
         originalBuffer.copyFrom (ch, 0, *buffer, ch, 0, buffer->getNumSamples());
     testPluginProcessor->processBlock(*buffer, midiBuffer);
 
+    //Check that filter now doesnt affect the audio signal
     CHECK_THAT(*buffer,
                AudioBuffersMatch(originalBuffer));
+
+    delete buffer;
 
     buffer = Helpers::generateAudioSampleBuffer();
     pParam->setValueNotifyingHost( 1.0f );
@@ -90,11 +95,11 @@ TEST_CASE("Wet Parameter", "[parameters]")
         originalBuffer.copyFrom (ch, 0, *buffer, ch, 0, buffer->getNumSamples());
     testPluginProcessor->processBlock(*buffer, midiBuffer);
 
+    //Finally, check that with max wet the signal is again affected
     CHECK_THAT(*buffer,
                !AudioBuffersMatch(originalBuffer));
 
-    ImageProcessing::drawAudioBufferImage(buffer, "RandomWet1");
-
+    delete buffer;
     delete testPluginProcessor;
 }
 
@@ -163,6 +168,63 @@ TEST_CASE("Big Buffer Wet Parameter", "[parameters]")
 
     delete testPluginProcessor;
 }
+TEST_CASE("Filter", "[functionality]")
+{
+    int samplesPerBlock = 4096;
+    int sampleRate = 44100;
+    testPluginProcessor = new AudioPluginAudioProcessor();
+    juce::MemoryMappedAudioFormatReader *reader = Helpers::readSineSweep();
+    juce::AudioBuffer<float> *buffer = new juce::AudioBuffer<float>(reader->numChannels, reader->lengthInSamples);
+    reader->read(buffer->getArrayOfWritePointers(), 1, 0, reader->lengthInSamples);
+    juce::AudioBuffer<float> originalBuffer(*buffer);
+
+    //Dismiss the partial chunk for now
+    int chunkAmount = buffer->getNumSamples() / samplesPerBlock;
+    ImageProcessing::drawAudioBufferImage(&originalBuffer, "Filter");
+
+    juce::MidiBuffer midiBuffer;
+
+    testPluginProcessor->prepareToPlay(sampleRate, samplesPerBlock);
+
+    //Process the sine sweep, one chunk at a time
+    for (int i = 0; i < chunkAmount; i++) {
+        juce::AudioBuffer<float> processBuffer(buffer->getNumChannels(), samplesPerBlock);
+	for (int ch = 0; ch < buffer->getNumChannels(); ++ch) {
+            processBuffer.copyFrom(0, 0, *buffer, ch, i * samplesPerBlock, samplesPerBlock);
+        }
+
+        testPluginProcessor->processBlock(processBuffer, midiBuffer);
+	for (int ch = 0; ch < buffer->getNumChannels(); ++ch) {
+            buffer->copyFrom(0, i * samplesPerBlock, processBuffer, ch, 0, samplesPerBlock);
+	}
+    }
+    ImageProcessing::drawAudioBufferImage(&originalBuffer, "Postfilter");
+
+    //Check that originalBuffer has higher total energy
+    CHECK_THAT(originalBuffer,
+               !AudioBufferHigherEnergy(*buffer));
+
+    juce::Array<float> maxEnergies;
+    for (int i = 0; i < fft_size / 2; i++) {
+        //Set the threshold for the lowest 32 frequency bands
+        if (i < 32) {
+            maxEnergies.set(i, 100);
+	}
+	//Skip the rest
+	else {
+            maxEnergies.set(i, -1);
+	
+	}
+    }
+    //Check that lower end frequencies are within limits
+    CHECK_THAT(*buffer,
+               AudioBufferCheckMaxEnergy(maxEnergies));
+
+    //I guess programming C++ like this in the year 2022 isn't a good idea to do publicly
+    delete buffer;
+    delete reader;
+    delete testPluginProcessor;
+}
 
 TEST_CASE("Filter Parameter", "[parameters]")
 {
@@ -195,7 +257,7 @@ TEST_CASE("Filter Parameter", "[parameters]")
     }
 
     CHECK_THAT(originalBuffer,
-               AudioBufferHigherEnergy(*buffer));
+               !AudioBufferHigherEnergy(*buffer));
 
     juce::Array<float> maxEnergies;
     for (int i = 0; i < fft_size / 2; i++) {
@@ -208,7 +270,7 @@ TEST_CASE("Filter Parameter", "[parameters]")
 	}
     }
     CHECK_THAT(*buffer,
-               AudioBufferMaxerEnergy(maxEnergies));
+               AudioBufferCheckMaxEnergy(maxEnergies));
 
     juce::Array<float> minEnergies;
     for (int i = 0; i < fft_size / 2; i++) {
@@ -220,7 +282,7 @@ TEST_CASE("Filter Parameter", "[parameters]")
 	}
     }
     CHECK_THAT(*buffer,
-               AudioBufferMaxerEnergy(maxEnergies));
+               AudioBufferCheckMinEnergy(minEnergies));
 
     ImageProcessing::drawAudioBufferImage(buffer, "RandomFilter1");
 

@@ -56,10 +56,7 @@ TEST_CASE("Wet Parameter", "[parameters]")
 {
     testPluginProcessor = new AudioPluginAudioProcessor();
     juce::AudioBuffer<float> *buffer = Helpers::generateAudioSampleBuffer();
-    juce::AudioBuffer<float> originalBuffer(2, buffer->getNumSamples());
-
-    for (int ch = 0; ch < buffer->getNumChannels(); ++ch)
-        originalBuffer.copyFrom (ch, 0, *buffer, ch, 0, buffer->getNumSamples());
+    juce::AudioBuffer<float> originalBuffer(*buffer);
 
     juce::MidiBuffer midiBuffer;
 
@@ -108,11 +105,8 @@ TEST_CASE("Big Buffer Wet Parameter", "[parameters]")
 {
     testPluginProcessor = new AudioPluginAudioProcessor();
     juce::AudioBuffer<float> *buffer = Helpers::generateBigAudioSampleBuffer();
-    juce::AudioBuffer<float> originalBuffer(2, buffer->getNumSamples());
+    juce::AudioBuffer<float> originalBuffer(*buffer);
     ImageProcessing::drawAudioBufferImage(buffer, "RandomWet");
-
-    for (int ch = 0; ch < buffer->getNumChannels(); ++ch)
-        originalBuffer.copyFrom (ch, 0, *buffer, ch, 0, buffer->getNumSamples());
 
     juce::MidiBuffer midiBuffer;
 
@@ -231,15 +225,11 @@ TEST_CASE("Filter Parameter", "[parameters]")
     testPluginProcessor = new AudioPluginAudioProcessor();
     juce::MemoryMappedAudioFormatReader *reader = Helpers::readSineSweep();
     juce::AudioBuffer<float> *buffer = new juce::AudioBuffer<float>(reader->numChannels, reader->lengthInSamples);
-    juce::AudioBuffer<float> originalBuffer(buffer->getNumChannels(), buffer->getNumSamples());
     reader->read(buffer->getArrayOfWritePointers(), 1, 0, reader->lengthInSamples);
+    juce::AudioBuffer<float> originalBuffer(*buffer);
     int chunkAmount = buffer->getNumSamples() / 4096;
 
     ImageProcessing::drawAudioBufferImage(buffer, "RandomFilter");
-
-
-    for (int ch = 0; ch < buffer->getNumChannels(); ++ch)
-        originalBuffer.copyFrom (ch, 0, *buffer, ch, 0, buffer->getNumSamples());
 
     CHECK_THAT(*buffer,
                AudioBuffersMatch(originalBuffer));
@@ -294,10 +284,6 @@ TEST_CASE("Processblock Benchmark", "[benchmarking]")
 {
     testPluginProcessor = new AudioPluginAudioProcessor();
     juce::AudioBuffer<float> *buffer = Helpers::generateAudioSampleBuffer();
-    juce::AudioBuffer<float> originalBuffer(2, buffer->getNumSamples());
-
-    for (int ch = 0; ch < buffer->getNumChannels(); ++ch)
-        originalBuffer.copyFrom (ch, 0, *buffer, ch, 0, buffer->getNumSamples());
 
     juce::MidiBuffer midiBuffer;
 
@@ -317,7 +303,7 @@ TEST_CASE("Processblock Benchmark", "[benchmarking]")
         meter.measure([&v, midiBuffer] (int i) mutable { return testPluginProcessor->processBlock(v.getReference(i), midiBuffer); });
     };
 
-
+    delete buffer;
     delete testPluginProcessor;
 }
 

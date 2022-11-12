@@ -6,12 +6,10 @@
 
 TEST_CASE("Plugin Instance Name Demo", "[presentation]")
 {
-//    testPluginProcessor = new AudioPluginAudioProcessor();
+//    AudioPluginAudioProcessor *testPluginProcessor = new AudioPluginAudioProcessor();
 
 //    CHECK_THAT(testPluginProcessor->getName().toStdString(),
 //               Catch::Matchers::Equals("Filter Unit Test"));
-    
-//    delete testPluginProcessor;
 }
 
 TEST_CASE("Filter Processor Demo", "[presentation]")
@@ -19,7 +17,7 @@ TEST_CASE("Filter Processor Demo", "[presentation]")
 //     int samplesPerBlock = 4096;
 //     int sampleRate = 44100;
 
-//     testPluginProcessor = new AudioPluginAudioProcessor();
+//     AudioPluginAudioProcessor *testPluginProcessor = new AudioPluginAudioProcessor();
 //     juce::MemoryMappedAudioFormatReader *reader = Helpers::readSineSweep();
 //     juce::AudioBuffer<float> *buffer = new juce::AudioBuffer<float>(reader->numChannels, reader->lengthInSamples);
 //     reader->read(buffer->getArrayOfWritePointers(), 1, 0, reader->lengthInSamples);
@@ -116,7 +114,7 @@ TEST_CASE("Draw Noise Buffer Demo", "[presentation]")
 
 TEST_CASE("Processblock Benchmark Demo", "[presentation]")
 {
-//     testPluginProcessor = new AudioPluginAudioProcessor();
+//     AudioPluginAudioProcessor *testPluginProcessor = new AudioPluginAudioProcessor();
 //     juce::AudioBuffer<float> *buffer = Helpers::generateAudioSampleBuffer();
 
 //     juce::MidiBuffer midiBuffer;

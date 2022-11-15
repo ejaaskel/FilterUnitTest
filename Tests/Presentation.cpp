@@ -10,6 +10,7 @@ TEST_CASE("Plugin Instance Name Demo", "[presentation]")
 
 //    CHECK_THAT(testPluginProcessor->getName().toStdString(),
 //               Catch::Matchers::Equals("Filter Unit Test"));
+
 }
 
 TEST_CASE("Filter Processor Demo", "[presentation]")
@@ -35,12 +36,13 @@ TEST_CASE("Filter Processor Demo", "[presentation]")
 //     for (int i = 0; i < chunkAmount; i++) {
 //         juce::AudioBuffer<float> processBuffer(buffer->getNumChannels(), samplesPerBlock);
 //         for (int ch = 0; ch < buffer->getNumChannels(); ++ch) {
-//             processBuffer.copyFrom(0, 0, *buffer, ch, i * samplesPerBlock, samplesPerBlock);
+//             processBuffer.copyFrom(ch, 0, *buffer, ch, i * samplesPerBlock, samplesPerBlock);
 //         }
-
+//
 //         testPluginProcessor->processBlock(processBuffer, midiBuffer);
+//
 //         for (int ch = 0; ch < buffer->getNumChannels(); ++ch) {
-//             buffer->copyFrom(0, i * samplesPerBlock, processBuffer, ch, 0, samplesPerBlock);
+//             buffer->copyFrom(ch, i * samplesPerBlock, processBuffer, ch, 0, samplesPerBlock);
 //         }
 //     }
 
@@ -63,6 +65,7 @@ TEST_CASE("Filter Processor Demo", "[presentation]")
 //     //Check that lower end frequencies are within limits
 //     CHECK_THAT(*buffer,
 //                AudioBufferCheckMaxEnergy(maxEnergies));
+
 }
 
 TEST_CASE("Wet Parameter Demo", "[presentation]")
@@ -104,12 +107,14 @@ TEST_CASE("Wet Parameter Demo", "[presentation]")
 //     //Finally, check that with max wet the signal is again affected
 //     CHECK_THAT(*buffer,
 //                !AudioBuffersMatch(originalBuffer));
+
 }
 
 TEST_CASE("Draw Noise Buffer Demo", "[presentation]")
 {
 //     juce::AudioBuffer<float> *buffer = Helpers::generateBigAudioSampleBuffer();
-//     ImageProcessing::drawAudioBufferImage(buffer, "SineSweep1");
+//     ImageProcessing::drawAudioBufferImage(buffer, "Noise");
+
 }
 
 TEST_CASE("Processblock Benchmark Demo", "[presentation]")
@@ -125,5 +130,6 @@ TEST_CASE("Processblock Benchmark Demo", "[presentation]")
 //     BENCHMARK("Plugin Processor Processblock") {
 //         return testPluginProcessor->processBlock(*buffer, midiBuffer);
 //     };
+
 }
 

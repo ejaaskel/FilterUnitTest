@@ -6,7 +6,7 @@
 
 TEST_CASE("Plugin Instance Name Demo", "[presentation]")
 {
-//    AudioPluginAudioProcessor *testPluginProcessor = new AudioPluginAudioProcessor();
+//    std::unique_ptr<AudioPluginAudioProcessor> testPluginProcessor = std::make_unique<AudioPluginAudioProcessor>();
 
 //    CHECK_THAT(testPluginProcessor->getName().toStdString(),
 //               Catch::Matchers::Equals("Filter Unit Test"));
@@ -18,11 +18,11 @@ TEST_CASE("Filter Processor Demo", "[presentation]")
 //     int samplesPerBlock = 4096;
 //     int sampleRate = 44100;
 
-//     AudioPluginAudioProcessor *testPluginProcessor = new AudioPluginAudioProcessor();
+//     std::unique_ptr<AudioPluginAudioProcessor> testPluginProcessor = std::make_unique<AudioPluginAudioProcessor>();
 //     juce::MemoryMappedAudioFormatReader *reader = Helpers::readSineSweep();
 //     juce::AudioBuffer<float> *buffer = new juce::AudioBuffer<float>(reader->numChannels, reader->lengthInSamples);
 //     reader->read(buffer->getArrayOfWritePointers(), 1, 0, reader->lengthInSamples);
-    
+  
 //     juce::AudioBuffer<float> originalBuffer(*buffer);
 
 //     //Dismiss the partial chunk for now
@@ -38,9 +38,9 @@ TEST_CASE("Filter Processor Demo", "[presentation]")
 //         for (int ch = 0; ch < buffer->getNumChannels(); ++ch) {
 //             processBuffer.copyFrom(ch, 0, *buffer, ch, i * samplesPerBlock, samplesPerBlock);
 //         }
-//
+
 //         testPluginProcessor->processBlock(processBuffer, midiBuffer);
-//
+
 //         for (int ch = 0; ch < buffer->getNumChannels(); ++ch) {
 //             buffer->copyFrom(ch, i * samplesPerBlock, processBuffer, ch, 0, samplesPerBlock);
 //         }
@@ -66,11 +66,17 @@ TEST_CASE("Filter Processor Demo", "[presentation]")
 //     CHECK_THAT(*buffer,
 //                AudioBufferCheckMaxEnergy(maxEnergies));
 
+
+
+//     juce::AudioBuffer<float> *goldenBuffer = Helpers::readBufferFromFile("golden_output");
+//     CHECK_THAT(*buffer,
+//                AudioBuffersMatch(*goldenBuffer));
+
 }
 
 TEST_CASE("Wet Parameter Demo", "[presentation]")
 {
-//     AudioPluginAudioProcessor *testPluginProcessor = new AudioPluginAudioProcessor();
+//     std::unique_ptr<AudioPluginAudioProcessor> testPluginProcessor = std::make_unique<AudioPluginAudioProcessor>();
 //     juce::AudioBuffer<float> *buffer = Helpers::generateAudioSampleBuffer();
 //     juce::AudioBuffer<float> originalBuffer(*buffer);
 

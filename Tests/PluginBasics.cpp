@@ -104,7 +104,7 @@ TEST_CASE("Wet Parameter", "[parameters]")
 TEST_CASE("Big Buffer Wet Parameter", "[parameters]")
 {
     testPluginProcessor = new AudioPluginAudioProcessor();
-    juce::AudioBuffer<float> *buffer = Helpers::generateBigAudioSampleBuffer();
+    juce::AudioBuffer<float> *buffer = Helpers::generateAudioSampleBuffer(2, 4096 * 256);
     juce::AudioBuffer<float> originalBuffer(*buffer);
     ImageProcessing::drawAudioBufferImage(buffer, "RandomWet");
 
@@ -124,7 +124,7 @@ TEST_CASE("Big Buffer Wet Parameter", "[parameters]")
     CHECK_THAT(*buffer,
                !AudioBuffersMatch(originalBuffer));
 
-    buffer = Helpers::generateBigAudioSampleBuffer();
+    buffer = Helpers::generateAudioSampleBuffer(2, 4096 * 256);
     auto *parameters = testPluginProcessor->getParameters();
     juce::RangedAudioParameter* pParam = parameters->getParameter ( "WET"  );
     pParam->setValueNotifyingHost( 0.0f );
@@ -142,7 +142,7 @@ TEST_CASE("Big Buffer Wet Parameter", "[parameters]")
     CHECK_THAT(*buffer,
                AudioBuffersMatch(originalBuffer));
 
-    buffer = Helpers::generateBigAudioSampleBuffer();
+    buffer = Helpers::generateAudioSampleBuffer(2, 4096 * 256);
     pParam->setValueNotifyingHost( 1.0f );
 
 

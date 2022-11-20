@@ -5,9 +5,8 @@
 
 class Helpers {
 public:
-    static juce::AudioBuffer<float>* generateAudioSampleBuffer();
-    static juce::AudioBuffer<float>* generateBigAudioSampleBuffer();
-    static juce::AudioBuffer<float>* generateIncreasingAudioSampleBuffer();
+    static juce::AudioBuffer<float>* generateAudioSampleBuffer(int channels = 2, int samples = 4096);
+    static juce::AudioBuffer<float>* generateIncreasingAudioSampleBuffer(int channels = 2, int samples = 4096);
     static juce::MemoryMappedAudioFormatReader* readSineSweep();
     static void writeBufferToFile(juce::AudioBuffer<float>* buffer, juce::String path);
     static juce::AudioBuffer<float>* readBufferFromFile(juce::String path);
